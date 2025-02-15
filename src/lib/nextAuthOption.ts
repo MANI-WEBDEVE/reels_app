@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { connectDB } from "./databaseConnection";
 import User from "@/Schema/User.Schema";
 import bcrypt from "bcryptjs";
+
 export const nextAuthOption: NextAuthOptions = {
   providers: [
     Credentials({
@@ -20,17 +21,16 @@ export const nextAuthOption: NextAuthOptions = {
           await connectDB();
           const user = await User.findOne({ email: credentials.email });
           if (!user) {
+            console.error("User not found");
             throw new Error("User not found");
           }
-          if (user.password !== credentials.password) {
-            throw new Error("Invalid password");
-          }
 
-          const isValidUser = bcrypt.compare(
+          const isValidUser = await bcrypt.compare(
             credentials.password,
             user.password
           );
           if (!isValidUser) {
+            console.error("Invalid password");
             throw new Error("Invalid password");
           }
           return {
@@ -38,32 +38,33 @@ export const nextAuthOption: NextAuthOptions = {
             email: user.email,
           };
         } catch (error) {
+          console.error("Failed to login:", error);
           throw new Error("Failed to login");
         }
       },
     }),
   ],
-  callbacks:{
-    async jwt({token, user}){
-        if(user){
-            token.id = user.id
-        }
-        return token
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
     },
-    async session({session, token}){
-        if(session.user){
-            session.user.id = token.id as string
-        }
-        return session
-    }
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
   },
-  session:{
-    strategy:"jwt",
+  session: {
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
   },
-  pages:{
-    signIn:"/login",
-    error:"/login"
+  pages: {
+    signIn: "/login",
+    error: "/login",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "muhammadinam786",
 };

@@ -17,12 +17,13 @@ export interface VideoSchemaType{
         height:number;
         quality?:number
     };
-    createdAt:Date;
-    updatedAt:Date
+    userID:string;
+    createdAt?:Date;
+    updatedAt?:Date
 }
 
 
-const VideoSchema = new Schema<VideoSchemaType>({
+const VideoSchema = new mongoose.Schema<VideoSchemaType>({
     title:{
         type:String,
         required:true,
@@ -47,10 +48,10 @@ const VideoSchema = new Schema<VideoSchemaType>({
     },
     transformation:{
         type:{
-            height: {Number, default:VIDEO_DIMENSION.height},
-            width:{Number, default:VIDEO_DIMENSION.width},
-            quality:{Number, min:1, max:100}
-        },
+            height: { type: Number, default: VIDEO_DIMENSION.height },
+            width: { type: Number, default: VIDEO_DIMENSION.width },
+            quality: { type: Number, min: 1, max: 100 }
+        }, 
         required:true
     }
 }, {timestamps:true})
